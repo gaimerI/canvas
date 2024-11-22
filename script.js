@@ -44,19 +44,30 @@ function stopDrawing() {
     isDrawing = false;
 }
 
-// Draw on the canvas
+// Draw on the canvas with smoothing
 function draw(event) {
     if (!isDrawing) return;
 
     const { x, y } = getCanvasCoordinates(event);
 
-    // Draw a circle (brush)
+    // Smoothing by using a quadratic bezier curve
     ctx.beginPath();
-    ctx.arc(lastX, lastY, currentWidth / 2, 0, Math.PI * 2, false); // Draw circle with radius of half the currentWidth
-    ctx.fillStyle = currentColor; // Set the fill color to the current selected color
-    ctx.fill();
+    ctx.moveTo(lastX, lastY); // Move to the last position
 
-    [lastX, lastY] = [x, y]; // Update the last position
+    // Control point is the current position, and the end point is the new position
+    const controlX = (lastX + x) / 2;
+    const controlY = (lastY + y) / 2;
+    ctx.quadraticCurveTo(lastX, lastY, controlX, controlY); // Create a smooth curve
+
+    // Draw the line with the current width and color
+    ctx.lineWidth = currentWidth;
+    ctx.strokeStyle = currentColor;
+    ctx.lineJoin = "round"; // Ensures smooth line joins
+    ctx.lineCap = "round";  // Ensures smooth line ends
+    ctx.stroke();
+
+    // Update the last position
+    [lastX, lastY] = [x, y];
 }
 
 // Attach mouse event listeners
