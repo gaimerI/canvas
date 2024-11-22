@@ -15,8 +15,6 @@ let lastX = 0;
 let lastY = 0;
 let currentColor = "#000"; // Default color is black
 let currentWidth = 5; // Default width is 5
-let prevX = 0;
-let prevY = 0; // Variables to hold previous position for smoothing
 
 // Utility function to get canvas coordinates from event
 function getCanvasCoordinates(event) {
@@ -39,7 +37,6 @@ function startDrawing(event) {
     isDrawing = true;
     const { x, y } = getCanvasCoordinates(event);
     [lastX, lastY] = [x, y];
-    [prevX, prevY] = [x, y]; // Initialize previous position
 }
 
 // Stop drawing
@@ -53,22 +50,24 @@ function draw(event) {
 
     const { x, y } = getCanvasCoordinates(event);
 
-    // Draw a smoothed line using quadraticCurveTo
+    // Smoothing by using a quadratic bezier curve
     ctx.beginPath();
-    ctx.moveTo(prevX, prevY); // Start from the previous point
+    ctx.moveTo(lastX, lastY); // Move to the last position
 
-    // Use quadraticCurveTo for smoothing
-    const midX = (lastX + prevX) / 2; // Find the midpoint between the previous point and the current point
-    const midY = (lastY + prevY) / 2;
+    // Control point is the current position, and the end point is the new position
+    const controlX = (lastX + x) / 2;
+    const controlY = (lastY + y) / 2;
+    ctx.quadraticCurveTo(lastX, lastY, controlX, controlY); // Create a smooth curve
 
-    ctx.quadraticCurveTo(midX, midY, x, y); // Draw a curve to the new point
+    // Draw the line with the current width and color
     ctx.lineWidth = currentWidth;
     ctx.strokeStyle = currentColor;
-    ctx.stroke(); // Apply the stroke
+    ctx.lineJoin = "round"; // Ensures smooth line joins
+    ctx.lineCap = "round";  // Ensures smooth line ends
+    ctx.stroke();
 
-    // Update positions
-    [prevX, prevY] = [lastX, lastY]; // Store previous point
-    [lastX, lastY] = [x, y]; // Update last point
+    // Update the last position
+    [lastX, lastY] = [x, y];
 }
 
 // Attach mouse event listeners
