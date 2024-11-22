@@ -12,57 +12,66 @@ let isDrawing = false;
 let lastX = 0;
 let lastY = 0;
 
-// Utility function to get the correct position for both mouse and touch events
-function getPosition(e) {
-    if (e.touches) {
+// Utility function to get canvas coordinates from event
+function getCanvasCoordinates(event) {
+    if (event.touches) {
+        const touch = event.touches[0];
         const rect = canvas.getBoundingClientRect();
         return {
-            x: e.touches[0].clientX - rect.left,
-            y: e.touches[0].clientY - rect.top,
+            x: touch.clientX - rect.left,
+            y: touch.clientY - rect.top
         };
-    } else {
-        return { x: e.offsetX, y: e.offsetY };
     }
+    return {
+        x: event.offsetX,
+        y: event.offsetY
+    };
 }
 
-// Start drawing when the mouse or touch is pressed
-function startDrawing(e) {
+// Start drawing
+function startDrawing(event) {
     isDrawing = true;
-    const pos = getPosition(e);
-    [lastX, lastY] = [pos.x, pos.y];
+    const { x, y } = getCanvasCoordinates(event);
+    [lastX, lastY] = [x, y];
 }
 
-// Stop drawing when the mouse or touch is released or leaves the canvas
+// Stop drawing
 function stopDrawing() {
     isDrawing = false;
 }
 
 // Draw on the canvas
-function draw(e) {
+function draw(event) {
     if (!isDrawing) return;
 
-    e.preventDefault(); // Prevent scrolling on touch devices
-    const pos = getPosition(e);
+    const { x, y } = getCanvasCoordinates(event);
 
     ctx.beginPath();
     ctx.moveTo(lastX, lastY); // Move to the last position
-    ctx.lineTo(pos.x, pos.y); // Draw a line to the current position
+    ctx.lineTo(x, y); // Draw a line to the current position
     ctx.strokeStyle = "#000"; // Set the stroke color
     ctx.lineWidth = 2; // Set the stroke width
     ctx.stroke();
-    [lastX, lastY] = [pos.x, pos.y]; // Update the last position
+    [lastX, lastY] = [x, y]; // Update the last position
 }
 
-// Event listeners for mouse events
+// Attach mouse event listeners
 canvas.addEventListener("mousedown", startDrawing);
-canvas.addEventListener("mousemove", draw);
 canvas.addEventListener("mouseup", stopDrawing);
 canvas.addEventListener("mouseout", stopDrawing);
+canvas.addEventListener("mousemove", draw);
 
-// Event listeners for touch events
-canvas.addEventListener("touchstart", startDrawing);
-canvas.addEventListener("touchmove", draw);
+// Attach touch event listeners
+canvas.addEventListener("touchstart", (e) => {
+    e.preventDefault(); // Prevent scrolling
+    startDrawing(e);
+});
 canvas.addEventListener("touchend", stopDrawing);
+canvas.addEventListener("touchcancel", stopDrawing);
+canvas.addEventListener("touchmove", (e) => {
+    e.preventDefault(); // Prevent scrolling
+    draw(e);
+});
 
 // Clear the canvas
 clearButton.addEventListener("click", () => {
