@@ -2,7 +2,7 @@
 const canvas = document.getElementById("drawingCanvas");
 const clearButton = document.getElementById("clearCanvas");
 const ctx = canvas.getContext("2d");
-var colour = "#000000"
+var colour = "#FF0000"
 
 // Set canvas dimensions
 canvas.width = window.innerWidth * 0.8;
