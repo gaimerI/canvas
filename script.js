@@ -82,5 +82,6 @@ clearButton.addEventListener("click", () => {
 
 // Change the drawing color based on color picker
 colorPicker.addEventListener("input", (e) => {
-    currentColor = e.target.value;
+    currentColor = e.target.value; // Update the current color from the color picker
+    console.log("Current color: ", currentColor); // Debugging line
 });
