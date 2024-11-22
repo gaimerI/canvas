@@ -14,6 +14,7 @@ let isDrawing = false;
 let lastX = 0;
 let lastY = 0;
 let currentColor = "#000"; // Default color is black
+let currentWidth = 5; // Default width is 5
 
 // Utility function to get canvas coordinates from event
 function getCanvasCoordinates(event) {
@@ -49,12 +50,12 @@ function draw(event) {
 
     const { x, y } = getCanvasCoordinates(event);
 
+    // Draw a circle (brush)
     ctx.beginPath();
-    ctx.moveTo(lastX, lastY); // Move to the last position
-    ctx.lineTo(x, y); // Draw a line to the current position
-    ctx.strokeStyle = currentColor; // Set the stroke color to the current selected color
-    ctx.lineWidth = currentWidth; // Set the stroke width
-    ctx.stroke();
+    ctx.arc(lastX, lastY, currentWidth / 2, 0, Math.PI * 2, false); // Draw circle with radius of half the currentWidth
+    ctx.fillStyle = currentColor; // Set the fill color to the current selected color
+    ctx.fill();
+
     [lastX, lastY] = [x, y]; // Update the last position
 }
 
@@ -87,8 +88,8 @@ colorPicker.addEventListener("input", (e) => {
     console.log("Current color: ", currentColor); // Debugging line
 });
 
-// Width too
+// Change the drawing width based on width picker
 widthPicker.addEventListener("input", (e) => {
-    currentWidth = e.target.value; // Update the current color from the color picker
+    currentWidth = e.target.value; // Update the current width from the width picker
     console.log("Current width: ", currentWidth); // Debugging line
 });
