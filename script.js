@@ -1,8 +1,8 @@
-// Select canvas and button elements
+// Select canvas, button, and color picker elements
 const canvas = document.getElementById("drawingCanvas");
 const clearButton = document.getElementById("clearCanvas");
+const colorPicker = document.getElementById("colorPicker");
 const ctx = canvas.getContext("2d");
-const colour = "#FF0000"
 
 // Set canvas dimensions
 canvas.width = window.innerWidth * 0.8;
@@ -12,6 +12,7 @@ canvas.height = window.innerHeight * 0.6;
 let isDrawing = false;
 let lastX = 0;
 let lastY = 0;
+let currentColor = "#000"; // Default color is black
 
 // Utility function to get canvas coordinates from event
 function getCanvasCoordinates(event) {
@@ -50,7 +51,7 @@ function draw(event) {
     ctx.beginPath();
     ctx.moveTo(lastX, lastY); // Move to the last position
     ctx.lineTo(x, y); // Draw a line to the current position
-    ctx.strokeStyle = colour; // Set the stroke color
+    ctx.strokeStyle = currentColor; // Set the stroke color to the current selected color
     ctx.lineWidth = 2; // Set the stroke width
     ctx.stroke();
     [lastX, lastY] = [x, y]; // Update the last position
@@ -77,4 +78,9 @@ canvas.addEventListener("touchmove", (e) => {
 // Clear the canvas
 clearButton.addEventListener("click", () => {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
+});
+
+// Change the drawing color based on color picker
+colorPicker.addEventListener("input", (e) => {
+    currentColor = e.target.value;
 });
