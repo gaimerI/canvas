@@ -44,29 +44,26 @@ function stopDrawing() {
     isDrawing = false;
 }
 
-// Draw on the canvas with smoothing
+// Draw with smoothing (using interpolation)
 function draw(event) {
     if (!isDrawing) return;
 
     const { x, y } = getCanvasCoordinates(event);
 
-    // Smoothing by using a quadratic bezier curve
+    // Interpolate between the last position and the current position
+    const smoothingFactor = 0.2; // Adjust for more or less smoothing
+
+    // Draw a line instead of a circle for smoother strokes
     ctx.beginPath();
-    ctx.moveTo(lastX, lastY); // Move to the last position
-
-    // Control point is the current position, and the end point is the new position
-    const controlX = (lastX + x) / 2;
-    const controlY = (lastY + y) / 2;
-    ctx.quadraticCurveTo(lastX, lastY, controlX, controlY); // Create a smooth curve
-
-    // Draw the line with the current width and color
+    ctx.moveTo(lastX, lastY);
+    ctx.lineTo(x, y);
     ctx.lineWidth = currentWidth;
-    ctx.strokeStyle = currentColor;
-    ctx.lineJoin = "round"; // Ensures smooth line joins
-    ctx.lineCap = "round";  // Ensures smooth line ends
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+    ctx.strokeStyle = currentColor; // Set the fill color to the current selected color
     ctx.stroke();
 
-    // Update the last position
+    // Update last position
     [lastX, lastY] = [x, y];
 }
 
@@ -97,10 +94,3 @@ clearButton.addEventListener("click", () => {
 colorPicker.addEventListener("input", (e) => {
     currentColor = e.target.value; // Update the current color from the color picker
     console.log("Current color: ", currentColor); // Debugging line
-});
-
-// Change the drawing width based on width picker
-widthPicker.addEventListener("input", (e) => {
-    currentWidth = e.target.value; // Update the current width from the width picker
-    console.log("Current width: ", currentWidth); // Debugging line
-});
