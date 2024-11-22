@@ -2,6 +2,7 @@
 const canvas = document.getElementById("drawingCanvas");
 const clearButton = document.getElementById("clearCanvas");
 const colorPicker = document.getElementById("colorPicker");
+const widthPicker = document.getElementById("widthPicker");
 const ctx = canvas.getContext("2d");
 
 // Set canvas dimensions
@@ -52,7 +53,7 @@ function draw(event) {
     ctx.moveTo(lastX, lastY); // Move to the last position
     ctx.lineTo(x, y); // Draw a line to the current position
     ctx.strokeStyle = currentColor; // Set the stroke color to the current selected color
-    ctx.lineWidth = 2; // Set the stroke width
+    ctx.lineWidth = currentWidth; // Set the stroke width
     ctx.stroke();
     [lastX, lastY] = [x, y]; // Update the last position
 }
@@ -84,4 +85,10 @@ clearButton.addEventListener("click", () => {
 colorPicker.addEventListener("input", (e) => {
     currentColor = e.target.value; // Update the current color from the color picker
     console.log("Current color: ", currentColor); // Debugging line
+});
+
+// Width too
+widthPicker.addEventListener("input", (e) => {
+    currentWidth = e.target.value; // Update the current color from the color picker
+    console.log("Current width: ", currentWidth); // Debugging line
 });
