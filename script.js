@@ -50,7 +50,7 @@ function draw(event) {
     ctx.beginPath();
     ctx.moveTo(lastX, lastY); // Move to the last position
     ctx.lineTo(x, y); // Draw a line to the current position
-    ctx.strokeStyle = "#FF0000"; // Set the stroke color
+    ctx.strokeStyle = colour; // Set the stroke color
     ctx.lineWidth = 2; // Set the stroke width
     ctx.stroke();
     [lastX, lastY] = [x, y]; // Update the last position
