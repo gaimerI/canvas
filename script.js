@@ -2,7 +2,6 @@
 const canvas = document.getElementById("drawingCanvas");
 const clearButton = document.getElementById("clearCanvas");
 const ctx = canvas.getContext("2d");
-var colour = "#FF0000"
 
 // Set canvas dimensions
 canvas.width = window.innerWidth * 0.8;
@@ -50,7 +49,7 @@ function draw(event) {
     ctx.beginPath();
     ctx.moveTo(lastX, lastY); // Move to the last position
     ctx.lineTo(x, y); // Draw a line to the current position
-    ctx.strokeStyle = colour; // Set the stroke color
+    ctx.strokeStyle = "#000"; // Set the stroke color
     ctx.lineWidth = 2; // Set the stroke width
     ctx.stroke();
     [lastX, lastY] = [x, y]; // Update the last position
