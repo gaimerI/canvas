@@ -180,22 +180,53 @@ function placeStamp(event) {
             console.error("Unknown stamp type:", stampType);
     }
 }
+});
+// Function to handle touch stamping
+function handleTouchStamp(event) {
+    event.preventDefault(); // Prevent scrolling or zooming
+    const touch = event.touches[0];
+    const rect = canvas.getBoundingClientRect();
+    const x = touch.clientX - rect.left;
+    const y = touch.clientY - rect.top;
 
-// Toggle stamp mode
+    const stampType = stampSelector.value;
+    switch (stampType) {
+        case "circle":
+            drawCircle(x, y);
+            break;
+        case "star":
+            drawStar(x, y);
+            break;
+        case "heart":
+            drawHeart(x, y);
+            break;
+        default:
+            console.error("Unknown stamp type:", stampType);
+    }
+}
+
+// Update event listeners for stamping
+function enableStamping() {
+    // Add mouse and touch event listeners
+    canvas.addEventListener("click", placeStamp); // Desktop stamping
+    canvas.addEventListener("touchstart", handleTouchStamp); // Mobile stamping
+}
+
+function disableStamping() {
+    // Remove mouse and touch event listeners
+    canvas.removeEventListener("click", placeStamp);
+    canvas.removeEventListener("touchstart", handleTouchStamp);
+}
+
+// Toggle stamp mode for both desktop and mobile
 stampTool.addEventListener("click", () => {
     isStamping = !isStamping;
     if (isStamping) {
-        canvas.addEventListener("click", placeStamp);
+        enableStamping();
         stampTool.textContent = "Stamping: ON";
     } else {
-        canvas.removeEventListener("click", placeStamp);
+        disableStamping();
         stampTool.textContent = "Stamping: OFF";
     }
-    
 });
-canvas.addEventListener("touchstart", (e) => {
-    if (isStamping) {
-        e.preventDefault();
-        placeStamp(e);
-    }
-});
+
