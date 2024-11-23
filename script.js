@@ -104,3 +104,91 @@ widthPicker.addEventListener("input", (e) => {
     currentWidth = e.target.value; // Update the current width from the width picker
     console.log("Current width: ", currentWidth); // Debugging line
 });
+
+
+        // Select stamp tool and selector
+const stampSelector = document.getElementById("stampSelector");
+const stampTool = document.getElementById("stampTool");
+
+// State for stamping
+let isStamping = false;
+
+// Function to draw a circle
+function drawCircle(x, y, radius = 30) {
+    ctx.beginPath();
+    ctx.arc(x, y, radius, 0, Math.PI * 2);
+    ctx.fillStyle = currentColor;
+    ctx.fill();
+}
+
+// Function to draw a star
+function drawStar(x, y, radius = 30) {
+    const spikes = 5;
+    const outerRadius = radius;
+    const innerRadius = radius / 2;
+    let angle = Math.PI / 2 * 3;
+    let cx = x;
+    let cy = y;
+    ctx.beginPath();
+    ctx.moveTo(cx, cy - outerRadius);
+    for (let i = 0; i < spikes; i++) {
+        cx = x + Math.cos(angle) * outerRadius;
+        cy = y - Math.sin(angle) * outerRadius;
+        ctx.lineTo(cx, cy);
+        angle += Math.PI / spikes;
+
+        cx = x + Math.cos(angle) * innerRadius;
+        cy = y - Math.sin(angle) * innerRadius;
+        ctx.lineTo(cx, cy);
+        angle += Math.PI / spikes;
+    }
+    ctx.closePath();
+    ctx.fillStyle = currentColor;
+    ctx.fill();
+}
+
+// Function to draw a heart
+function drawHeart(x, y, size = 30) {
+    ctx.beginPath();
+    const topCurveHeight = size * 0.3;
+    ctx.moveTo(x, y + topCurveHeight);
+    ctx.bezierCurveTo(x, y, x - size / 2, y, x - size / 2, y + topCurveHeight);
+    ctx.bezierCurveTo(x - size / 2, y + size, x, y + size, x, y + size * 1.5);
+    ctx.bezierCurveTo(x, y + size, x + size / 2, y + size, x + size / 2, y + topCurveHeight);
+    ctx.bezierCurveTo(x + size / 2, y, x, y, x, y + topCurveHeight);
+    ctx.closePath();
+    ctx.fillStyle = currentColor;
+    ctx.fill();
+}
+
+// Function to handle stamp placement
+function placeStamp(event) {
+    const { x, y } = getCanvasCoordinates(event);
+
+    const stampType = stampSelector.value;
+    switch (stampType) {
+        case "circle":
+            drawCircle(x, y);
+            break;
+        case "star":
+            drawStar(x, y);
+            break;
+        case "heart":
+            drawHeart(x, y);
+            break;
+        default:
+            console.error("Unknown stamp type:", stampType);
+    }
+}
+
+// Toggle stamp mode
+stampTool.addEventListener("click", () => {
+    isStamping = !isStamping;
+    if (isStamping) {
+        canvas.addEventListener("click", placeStamp);
+        stampTool.textContent = "Stamping: ON";
+    } else {
+        canvas.removeEventListener("click", placeStamp);
+        stampTool.textContent = "Stamping: OFF";
+    }
+});
