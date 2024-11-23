@@ -191,4 +191,11 @@ stampTool.addEventListener("click", () => {
         canvas.removeEventListener("click", placeStamp);
         stampTool.textContent = "Stamping: OFF";
     }
+    
+});
+canvas.addEventListener("touchstart", (e) => {
+    if (isStamping) {
+        e.preventDefault();
+        placeStamp(e);
+    }
 });
