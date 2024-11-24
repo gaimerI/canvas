@@ -6,9 +6,17 @@ const ctx = canvas.getContext('2d');
 
 // Set canvas size to fill the viewport
 function resizeCanvas() {
-  canvas.width = window.innerWidth * 0.9; // Adjust to fit the screen
+  const tempCanvas = document.createElement('canvas');
+  tempCanvas.width = canvas.width;
+  tempCanvas.height = canvas.height;
+  tempCanvas.getContext('2d').drawImage(canvas, 0, 0);
+
+  canvas.width = window.innerWidth * 0.9;
   canvas.height = window.innerHeight * 0.7;
+
+  ctx.drawImage(tempCanvas, 0, 0);
 }
+
 resizeCanvas();
 
 // Variables to track drawing state
