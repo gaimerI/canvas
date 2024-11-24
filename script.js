@@ -11,13 +11,23 @@ function resizeCanvas() {
   tempCanvas.height = canvas.height;
   tempCanvas.getContext('2d').drawImage(canvas, 0, 0);
 
-  canvas.width = window.innerWidth * 0.9;
-  canvas.height = window.innerHeight * 0.7;
+  const dpr = window.devicePixelRatio || 1;
+  canvas.width = Math.floor(window.innerWidth * 0.9 * dpr);
+  canvas.height = Math.floor(window.innerHeight * 0.7 * dpr);
+  canvas.style.width = `${window.innerWidth * 0.9}px`;
+  canvas.style.height = `${window.innerHeight * 0.7}px`;
 
+  ctx.scale(dpr, dpr);
   ctx.drawImage(tempCanvas, 0, 0);
 }
 
 resizeCanvas();
+saveState();
+
+document.getElementById('clearCanvas').addEventListener('click', () => {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  saveState();
+});
 
 // Variables to track drawing state
 let isDrawing = false;
@@ -59,8 +69,13 @@ canvas.addEventListener('mousemove', (e) => draw(e.offsetX, e.offsetY));
 canvas.addEventListener('mouseup', stopDrawing);
 canvas.addEventListener('mouseout', stopDrawing);
 
+canvas.addEventListener('touchcancel', stopDrawing);
+canvas.addEventListener('mouseup', saveState);
+canvas.addEventListener('touchend', saveState);
+
 // Add event listeners for touch events
 canvas.addEventListener('touchstart', (e) => {
+  e.preventDefault(); // Prevent default scrolling behavior
   const touch = e.touches[0];
   const rect = canvas.getBoundingClientRect();
   startDrawing(touch.clientX - rect.left, touch.clientY - rect.top);
@@ -87,7 +102,12 @@ document.getElementById('colorPicker').addEventListener('input', (e) => {
 
 let undoStack = [];
 
+const MAX_UNDO_STACK = 50;
+
 function saveState() {
+  if (undoStack.length >= MAX_UNDO_STACK) {
+    undoStack.shift(); // Remove oldest state
+  }
   undoStack.push(canvas.toDataURL());
 }
 
