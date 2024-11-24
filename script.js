@@ -80,3 +80,28 @@ document.getElementById('clearCanvas').addEventListener('click', () => {
 
 // Handle window resize
 window.addEventListener('resize', resizeCanvas);
+
+document.getElementById('colorPicker').addEventListener('input', (e) => {
+  ctx.strokeStyle = e.target.value;
+});
+
+let undoStack = [];
+
+function saveState() {
+  undoStack.push(canvas.toDataURL());
+}
+
+function undo() {
+  if (undoStack.length) {
+    const img = new Image();
+    img.src = undoStack.pop();
+    img.onload = () => {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.drawImage(img, 0, 0);
+    };
+  }
+}
+
+// Save state before every draw
+canvas.addEventListener('mousedown', saveState);
+document.getElementById('undoButton').addEventListener('click', undo);
