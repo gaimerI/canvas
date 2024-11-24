@@ -24,11 +24,6 @@ function resizeCanvas() {
 resizeCanvas();
 saveState();
 
-document.getElementById('clearCanvas').addEventListener('click', () => {
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-  saveState();
-});
-
 // Variables to track drawing state
 let isDrawing = false;
 let lastX = 0;
@@ -91,6 +86,7 @@ canvas.addEventListener('touchend', stopDrawing);
 // Clear the canvas
 document.getElementById('clearCanvas').addEventListener('click', () => {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
+  saveState();
 });
 
 // Handle window resize
@@ -108,20 +104,21 @@ function saveState() {
   if (undoStack.length >= MAX_UNDO_STACK) {
     undoStack.shift(); // Remove oldest state
   }
-  undoStack.push(canvas.toDataURL());
+  undoStack.push(ctx.getImageData(0, 0, canvas.width, canvas.height));
 }
 
 function undo() {
   if (undoStack.length) {
-    const img = new Image();
-    img.src = undoStack.pop();
-    img.onload = () => {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      ctx.drawImage(img, 0, 0);
-    };
+    ctx.putImageData(undoStack.pop(), 0, 0);
   }
 }
+
 
 // Save state before every draw
 canvas.addEventListener('mousedown', saveState);
 document.getElementById('undoButton').addEventListener('click', undo);
+
+canvas.addEventListener('touchend', () => {
+  stopDrawing();
+  saveState();
+});
