@@ -1,124 +1,88 @@
-// JavaScript for the Canvas Drawing App
+// Select the canvas and set up the rendering context
+const canvas = document.getElementById("canvas");
+const ctx = canvas.getContext("2d");
 
-// Get the canvas and context
-const canvas = document.getElementById('drawingCanvas');
-const ctx = canvas.getContext('2d');
+// Set canvas size
+canvas.width = window.innerWidth * 0.8;
+canvas.height = window.innerHeight * 0.8;
 
-// Set canvas size to fill the viewport
-function resizeCanvas() {
-  const tempCanvas = document.createElement('canvas');
-  tempCanvas.width = canvas.width;
-  tempCanvas.height = canvas.height;
-  tempCanvas.getContext('2d').drawImage(canvas, 0, 0);
+// Center of the canvas
+const centerX = canvas.width / 2;
+const centerY = canvas.height / 2;
 
-  const dpr = window.devicePixelRatio || 1;
-  canvas.width = Math.floor(window.innerWidth * 0.9 * dpr);
-  canvas.height = Math.floor(window.innerHeight * 0.7 * dpr);
-  canvas.style.width = `${window.innerWidth * 0.9}px`;
-  canvas.style.height = `${window.innerHeight * 0.7}px`;
+// Size of the cube
+const cubeSize = 100;
 
-  ctx.scale(dpr, dpr);
-  ctx.drawImage(tempCanvas, 0, 0);
+// Perspective and rotation
+let angleX = 0;
+let angleY = 0;
+const perspective = 500; // Perspective factor
+
+// Vertices of a cube (normalized to size 1)
+const vertices = [
+    [-1, -1, -1],
+    [1, -1, -1],
+    [1, 1, -1],
+    [-1, 1, -1],
+    [-1, -1, 1],
+    [1, -1, 1],
+    [1, 1, 1],
+    [-1, 1, 1]
+];
+
+// Edges connecting the vertices
+const edges = [
+    [0, 1], [1, 2], [2, 3], [3, 0], // Back face
+    [4, 5], [5, 6], [6, 7], [7, 4], // Front face
+    [0, 4], [1, 5], [2, 6], [3, 7]  // Connecting edges
+];
+
+// Function to project 3D points to 2D
+function project([x, y, z]) {
+    const scale = perspective / (perspective + z);
+    return [
+        centerX + x * scale * cubeSize,
+        centerY - y * scale * cubeSize
+    ];
 }
 
-resizeCanvas();
-saveState();
+// Function to rotate a 3D point around the X and Y axes
+function rotate([x, y, z]) {
+    // Rotate around X-axis
+    let newY = y * Math.cos(angleX) - z * Math.sin(angleX);
+    let newZ = y * Math.sin(angleX) + z * Math.cos(angleX);
 
-// Variables to track drawing state
-let isDrawing = false;
-let lastX = 0;
-let lastY = 0;
+    // Rotate around Y-axis
+    let newX = x * Math.cos(angleY) + newZ * Math.sin(angleY);
+    newZ = -x * Math.sin(angleY) + newZ * Math.cos(angleY);
 
-// Set up drawing properties
-ctx.lineWidth = 3;
-ctx.lineCap = 'round';
-ctx.strokeStyle = '#007BFF';
-
-// Function to start drawing
-function startDrawing(x, y) {
-  isDrawing = true;
-  lastX = x;
-  lastY = y;
+    return [newX, newY, newZ];
 }
 
-// Function to draw on the canvas
-function draw(x, y) {
-  if (!isDrawing) return;
+// Animation loop
+function animate() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-  ctx.beginPath();
-  ctx.moveTo(lastX, lastY);
-  ctx.lineTo(x, y);
-  ctx.stroke();
-  [lastX, lastY] = [x, y];
+    // Rotate cube
+    angleX += 0.01;
+    angleY += 0.01;
+
+    // Project and draw edges
+    const projectedVertices = vertices.map(vertex => project(rotate(vertex)));
+    ctx.strokeStyle = "#000";
+    ctx.lineWidth = 2;
+
+    edges.forEach(([start, end]) => {
+        const [x1, y1] = projectedVertices[start];
+        const [x2, y2] = projectedVertices[end];
+        ctx.beginPath();
+        ctx.moveTo(x1, y1);
+        ctx.lineTo(x2, y2);
+        ctx.stroke();
+    });
+
+    requestAnimationFrame(animate);
 }
 
-// Function to stop drawing
-function stopDrawing() {
-  isDrawing = false;
-  ctx.beginPath(); // Reset path
-}
-
-// Add event listeners for mouse events
-canvas.addEventListener('mousedown', (e) => startDrawing(e.offsetX, e.offsetY));
-canvas.addEventListener('mousemove', (e) => draw(e.offsetX, e.offsetY));
-canvas.addEventListener('mouseup', stopDrawing);
-canvas.addEventListener('mouseout', stopDrawing);
-
-canvas.addEventListener('touchcancel', stopDrawing);
-canvas.addEventListener('mouseup', saveState);
-canvas.addEventListener('touchend', saveState);
-
-// Add event listeners for touch events
-canvas.addEventListener('touchstart', (e) => {
-  e.preventDefault(); // Prevent default scrolling behavior
-  const touch = e.touches[0];
-  const rect = canvas.getBoundingClientRect();
-  startDrawing(touch.clientX - rect.left, touch.clientY - rect.top);
-});
-canvas.addEventListener('touchmove', (e) => {
-  const touch = e.touches[0];
-  const rect = canvas.getBoundingClientRect();
-  draw(touch.clientX - rect.left, touch.clientY - rect.top);
-  e.preventDefault(); // Prevent scrolling while drawing
-});
-canvas.addEventListener('touchend', stopDrawing);
-
-// Clear the canvas
-document.getElementById('clearCanvas').addEventListener('click', () => {
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-  saveState();
-});
-
-// Handle window resize
-window.addEventListener('resize', resizeCanvas);
-
-document.getElementById('colorPicker').addEventListener('input', (e) => {
-  ctx.strokeStyle = e.target.value;
-});
-
-let undoStack = [];
-
-const MAX_UNDO_STACK = 50;
-
-function saveState() {
-  if (undoStack.length >= MAX_UNDO_STACK) {
-    undoStack.shift(); // Remove oldest state
-  }
-  undoStack.push(ctx.getImageData(0, 0, canvas.width, canvas.height));
-}
-
-function undo() {
-  if (undoStack.length) {
-    ctx.putImageData(undoStack.pop(), 0, 0);
-  }
-}
-
-
-// Save state before every draw
-canvas.addEventListener('mousedown', saveState);
-document.getElementById('undoButton').addEventListener('click', undo);
-
-canvas.addEventListener('touchend', () => {
-  stopDrawing();
-  saveState();
-});
+// Start animation
+animate();
