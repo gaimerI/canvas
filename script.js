@@ -1,18 +1,16 @@
-// Select DOM elements
-const inputText = document.getElementById('inputText');
-const tokenizeButton = document.getElementById('tokenizeButton');
-const output = document.getElementById('output');
+// Get references to the DOM elements
+const textInput = document.getElementById("textInput");
+const tokenizeButton = document.getElementById("tokenizeButton");
+const output = document.getElementById("output");
 
-// Function to tokenize text
-function tokenizeText(text) {
-    // Split text into tokens using spaces, punctuation, and newlines as delimiters
-    const tokens = text.match(/\b\w+\b/g) || [];
-    return tokens;
-}
+// Event listener for the button
+tokenizeButton.addEventListener("click", () => {
+    // Get the input text
+    const text = textInput.value;
 
-// Add an event listener to the button
-tokenizeButton.addEventListener('click', () => {
-    const text = inputText.value; // Get the input text
-    const tokens = tokenizeText(text); // Tokenize the text
-    output.textContent = JSON.stringify(tokens, null, 2); // Display the tokens as a JSON array
+    // Tokenize the text into words (split by spaces and remove empty strings)
+    const tokens = text.split(/\s+/).filter(token => token.length > 0);
+
+    // Display the tokens
+    output.textContent = tokens.length ? tokens.join(", ") : "No words found.";
 });
