@@ -1,19 +1,18 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Text Tokenizer</title>
-    <link rel="stylesheet" href="styles.css">
-</head>
-<body>
-    <div class="container">
-        <h1>Text Tokenizer</h1>
-        <textarea id="inputText" placeholder="Enter your text here..." rows="5"></textarea>
-        <button id="tokenizeButton">Tokenize Text</button>
-        <h2>Tokenized Output</h2>
-        <pre id="output"></pre>
-    </div>
-    <script src="script.js"></script>
-</body>
-</html>
+// Select DOM elements
+const inputText = document.getElementById('inputText');
+const tokenizeButton = document.getElementById('tokenizeButton');
+const output = document.getElementById('output');
+
+// Function to tokenize text
+function tokenizeText(text) {
+    // Split text into tokens using spaces, punctuation, and newlines as delimiters
+    const tokens = text.match(/\b\w+\b/g) || [];
+    return tokens;
+}
+
+// Add an event listener to the button
+tokenizeButton.addEventListener('click', () => {
+    const text = inputText.value; // Get the input text
+    const tokens = tokenizeText(text); // Tokenize the text
+    output.textContent = JSON.stringify(tokens, null, 2); // Display the tokens as a JSON array
+});
