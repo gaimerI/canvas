@@ -1,3 +1,8 @@
+body {
+  background-color: #f0f0f0;
+  font-family: Arial;
+}
+
 .container {
   display: flex;
   justify-content: space-between; /* Ensures spacing between columns */
