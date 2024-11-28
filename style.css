@@ -1,14 +1,17 @@
-.column-left {
-  float: left;
-  width: 33.333%;
+.container {
+  display: flex;
+  justify-content: space-between; /* Ensures spacing between columns */
+  width: 100%; /* Full width */
+  box-sizing: border-box; /* Avoids overflow due to padding/margin */
 }
 
-.column-right {
-  float: right;
+.column-left, .column-center, .column-right {
   width: 33.333%;
+  text-align: center; /* Optional: Aligns text inside columns */
 }
 
-.column-center{
-  display: inline-block;
-  width: 33.333%;
+.column-center {
+  display: flex;
+  justify-content: center;
+  align-items: center; /* Ensures center alignment vertically and horizontally */
 }
