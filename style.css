@@ -15,6 +15,10 @@ body {
   text-align: center; /* Optional: Aligns text inside columns */
 }
 
+.column-right {
+  position: sticky;
+}
+
 .column-center {
   display: flex;
   justify-content: center;
