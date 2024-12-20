@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Canvas Application</title>
+  <title>Canvas Application with Touch Support</title>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -17,6 +17,7 @@
     canvas {
       border: 1px solid #000;
       cursor: crosshair;
+      touch-action: none; /* Prevent touch scrolling on the canvas */
     }
     .toolbar {
       margin: 10px;
@@ -29,7 +30,7 @@
   </style>
 </head>
 <body>
-  <h1>Canvas Application</h1>
+  <h1>Canvas Application with Touch Support</h1>
   <div class="toolbar">
     <label for="color">Color:</label>
     <input type="color" id="color" value="#000000">
@@ -68,29 +69,26 @@
     ctx.strokeStyle = colorPicker.value;
     ctx.lineWidth = sizePicker.value;
 
-    canvas.addEventListener('mousedown', (e) => {
-      painting = true;
-      startX = e.offsetX;
-      startY = e.offsetY;
-      if (tool === 'brush' || tool === 'eraser') {
-        draw(e);
-      }
+    // Mouse Events
+    canvas.addEventListener('mousedown', (e) => startDrawing(e.offsetX, e.offsetY));
+    canvas.addEventListener('mousemove', (e) => continueDrawing(e.offsetX, e.offsetY));
+    canvas.addEventListener('mouseup', endDrawing);
+
+    // Touch Events
+    canvas.addEventListener('touchstart', (e) => {
+      const touch = e.touches[0];
+      const rect = canvas.getBoundingClientRect();
+      startDrawing(touch.clientX - rect.left, touch.clientY - rect.top);
     });
 
-    canvas.addEventListener('mousemove', (e) => {
-      if (!painting) return;
-      if (tool === 'brush' || tool === 'eraser') {
-        draw(e);
-      }
+    canvas.addEventListener('touchmove', (e) => {
+      const touch = e.touches[0];
+      const rect = canvas.getBoundingClientRect();
+      continueDrawing(touch.clientX - rect.left, touch.clientY - rect.top);
+      e.preventDefault(); // Prevent scrolling while drawing
     });
 
-    canvas.addEventListener('mouseup', () => {
-      if (tool !== 'brush' && tool !== 'eraser') {
-        drawShape();
-      }
-      painting = false;
-      ctx.beginPath();
-    });
+    canvas.addEventListener('touchend', endDrawing);
 
     // Update brush color
     colorPicker.addEventListener('input', () => {
@@ -120,22 +118,46 @@
       tool = e.target.value;
     });
 
-    function draw(e) {
+    function startDrawing(x, y) {
+      painting = true;
+      startX = x;
+      startY = y;
+      if (tool === 'brush' || tool === 'eraser') {
+        draw(x, y);
+      }
+    }
+
+    function continueDrawing(x, y) {
+      if (!painting) return;
+      if (tool === 'brush' || tool === 'eraser') {
+        draw(x, y);
+      }
+    }
+
+    function endDrawing() {
+      if (tool !== 'brush' && tool !== 'eraser') {
+        drawShape();
+      }
+      painting = false;
+      ctx.beginPath();
+    }
+
+    function draw(x, y) {
       if (tool === 'eraser') {
         ctx.globalCompositeOperation = 'destination-out';
         ctx.lineWidth = sizePicker.value; // Adjust eraser size
       } else {
         ctx.globalCompositeOperation = 'source-over';
       }
-      ctx.lineTo(e.offsetX, e.offsetY);
+      ctx.lineTo(x, y);
       ctx.stroke();
       ctx.beginPath();
-      ctx.moveTo(e.offsetX, e.offsetY);
+      ctx.moveTo(x, y);
     }
 
     function drawShape() {
-      const endX = event.offsetX;
-      const endY = event.offsetY;
+      const endX = startX;
+      const endY = startY;
       ctx.beginPath();
       ctx.globalCompositeOperation = 'source-over';
       ctx.strokeStyle = colorPicker.value;
