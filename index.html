@@ -1,24 +1,162 @@
 <!DOCTYPE html>
-<html>
-  <head>
-    <title>Canvas</title>
-    <link rel="stylesheet" href="style.css">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  </head>
-  <body>
-    <h1>Hello</h1>
-    <div class="container">
-      <div class="column-left">
-        Left
-      </div>
-      
-      <div class="column-center">
-        Centre
-      </div>
-      
-      <div class="column-right">
-        Navigation:
-      </div>
-    </div>
-  </body>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Canvas Application</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+    canvas {
+      border: 1px solid #000;
+      cursor: crosshair;
+    }
+    .toolbar {
+      margin: 10px;
+      display: flex;
+      gap: 10px;
+    }
+    button, input, select {
+      padding: 5px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Canvas Application</h1>
+  <div class="toolbar">
+    <label for="color">Color:</label>
+    <input type="color" id="color" value="#000000">
+    
+    <label for="size">Brush Size:</label>
+    <input type="range" id="size" min="1" max="50" value="5">
+    
+    <button id="clear">Clear Canvas</button>
+    <button id="save">Save as Image</button>
+    
+    <label for="tool">Tool:</label>
+    <select id="tool">
+      <option value="brush">Brush</option>
+      <option value="eraser">Eraser</option>
+      <option value="rectangle">Rectangle</option>
+      <option value="circle">Circle</option>
+      <option value="line">Line</option>
+    </select>
+  </div>
+  <canvas id="canvas" width="800" height="500"></canvas>
+  
+  <script>
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d');
+    const colorPicker = document.getElementById('color');
+    const sizePicker = document.getElementById('size');
+    const clearButton = document.getElementById('clear');
+    const saveButton = document.getElementById('save');
+    const toolSelector = document.getElementById('tool');
+
+    let painting = false;
+    let tool = 'brush';
+    let startX, startY;
+
+    // Set initial properties
+    ctx.strokeStyle = colorPicker.value;
+    ctx.lineWidth = sizePicker.value;
+
+    canvas.addEventListener('mousedown', (e) => {
+      painting = true;
+      startX = e.offsetX;
+      startY = e.offsetY;
+      if (tool === 'brush' || tool === 'eraser') {
+        draw(e);
+      }
+    });
+
+    canvas.addEventListener('mousemove', (e) => {
+      if (!painting) return;
+      if (tool === 'brush' || tool === 'eraser') {
+        draw(e);
+      }
+    });
+
+    canvas.addEventListener('mouseup', () => {
+      if (tool !== 'brush' && tool !== 'eraser') {
+        drawShape();
+      }
+      painting = false;
+      ctx.beginPath();
+    });
+
+    // Update brush color
+    colorPicker.addEventListener('input', () => {
+      ctx.strokeStyle = colorPicker.value;
+    });
+
+    // Update brush size
+    sizePicker.addEventListener('input', () => {
+      ctx.lineWidth = sizePicker.value;
+    });
+
+    // Clear canvas
+    clearButton.addEventListener('click', () => {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+    });
+
+    // Save canvas as image
+    saveButton.addEventListener('click', () => {
+      const link = document.createElement('a');
+      link.download = 'canvas.png';
+      link.href = canvas.toDataURL();
+      link.click();
+    });
+
+    // Select tool
+    toolSelector.addEventListener('change', (e) => {
+      tool = e.target.value;
+    });
+
+    function draw(e) {
+      if (tool === 'eraser') {
+        ctx.globalCompositeOperation = 'destination-out';
+        ctx.lineWidth = sizePicker.value; // Adjust eraser size
+      } else {
+        ctx.globalCompositeOperation = 'source-over';
+      }
+      ctx.lineTo(e.offsetX, e.offsetY);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(e.offsetX, e.offsetY);
+    }
+
+    function drawShape() {
+      const endX = event.offsetX;
+      const endY = event.offsetY;
+      ctx.beginPath();
+      ctx.globalCompositeOperation = 'source-over';
+      ctx.strokeStyle = colorPicker.value;
+
+      switch (tool) {
+        case 'rectangle':
+          ctx.rect(startX, startY, endX - startX, endY - startY);
+          break;
+        case 'circle':
+          const radius = Math.sqrt((endX - startX) ** 2 + (endY - startY) ** 2);
+          ctx.arc(startX, startY, radius, 0, Math.PI * 2);
+          break;
+        case 'line':
+          ctx.moveTo(startX, startY);
+          ctx.lineTo(endX, endY);
+          break;
+      }
+
+      ctx.stroke();
+      ctx.closePath();
+    }
+  </script>
+</body>
 </html>
